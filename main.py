@@ -1,41 +1,140 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.image import Image
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
+import os
 from kivy.uix.video import Video
 from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivymd.app import MDApp
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.label import MDLabel
+from kivymd.uix.screen import MDScreen
 
 # Add this import at the beginning of your script
 from kivy.uix.popup import Popup
-import os
 
-class NumerologyNameAnalyzerApp(App):
+
+class NumerologyNameAnalyzerApp(MDApp):
+    """
+    The main application class for NumerologyNameAnalyzer.
+
+    This class defines the structure and behavior of the NumerologyNameAnalyzer app.
+    It includes the user interface setup, name-to-number conversion logic, and video playback.
+
+    Attributes:
+        None
+
+    Methods:
+        - build(self): Build the app's user interface.
+        - convert_name(self, instance): Handle name conversion and video playback.
+        - calculate_number(self, name): Calculate the numerology number for a given name.
+        - play_video(self, number): Play the associated video explanation.
+    """
+
     def build(self):
-        layout = BoxLayout(orientation='vertical')
+        """
+        Build the user interface of the NumerologyNameAnalyzer app.
 
-        # Logo
-        logo = Image(source='logo.png')
-        layout.add_widget(logo)
+        This method constructs the app's user interface, including a logo, input box,
+        and 'Convert' button.
 
-        # Input Box
-        input_box = TextInput(hint_text='Enter your name')
-        layout.add_widget(input_box)
+        Parameters:
+            self: The NumerologyNameAnalyzerApp instance.
 
-        # Convert Button
-        convert_button = Button(text='Convert')
-        convert_button.bind(on_press=self.convert_name)
-        layout.add_widget(convert_button)
+        Returns:
+            layout (BoxLayout): The root layout of the app's user interface.
+        """
+        # Customize the color palette
+        self.theme_cls.primary_palette = "Purple"  # Set the primary color
+        self.theme_cls.primary_hue = "400"  # Choose the hue (e.g., "400")
+        self.theme_cls.theme_style = "Dark"  # Choose the dark theme
 
-        return layout
+        screen = MDScreen()
+
+        # Create a BoxLayout for content with a vertical orientation
+        content = BoxLayout(orientation="vertical")
+
+        # Create a custom toolbar using a BoxLayout
+        toolbar = BoxLayout(
+            orientation="horizontal",
+            size_hint=(1, None),
+            height=56,  # Adjust the height as needed
+            spacing=10,
+        )
+        title_label = Label(
+            text="Numerology Name Analyzer",
+            size_hint_x=None,
+            width=Window.width,  # Adjust the width as needed
+            bold=True,
+            color=(1, 1, 1, 1),  # Set the text color to white (R,G,B,A)
+        )
+
+        toolbar.add_widget(title_label)
+
+        # Create a BoxLayout for the middle widget (name input and video) with a vertical orientation
+        middle_widget = BoxLayout(orientation="vertical", size_hint=(1, None), height=300)
+
+        # Create an MDTextField for name input with a customized line color
+        name_input = MDTextField(
+            hint_text="Enter your name",
+        )
+        name_input.line_color = self.theme_cls.primary_color  # Set the line color
+
+        # Create an MDRaisedButton for conversion with a customized color
+        convert_button = MDRaisedButton(
+            text="Convert",
+            on_release=self.convert_name,
+            md_bg_color=self.theme_cls.primary_color,  # Use the primary color
+        )
+
+        middle_widget.add_widget(name_input)  # Add the name input field here
+        middle_widget.add_widget(convert_button)
+
+        # Create an MDLabel for displaying results
+        self.result_label = MDLabel()
+        middle_widget.add_widget(self.result_label)
+
+        # Add the middle widget to the content layout
+        content.add_widget(toolbar)
+        content.add_widget(middle_widget)
+
+        screen.add_widget(content)
+        return screen
 
     def convert_name(self, instance):
-        # Add your name-to-number conversion logic here
+        """
+        Handle name conversion and video playback.
+
+        This method is triggered when the user clicks the 'Convert' button. It retrieves
+        the user-entered name, calculates the numerology number, and plays the associated
+        video explanation.
+
+        Parameters:
+            self: The NumerologyNameAnalyzerApp instance.
+            instance: The button instance that triggered the event.
+
+        Returns:
+            None
+        """
+
         user_name = self.root.children[1].text
         converted_number = self.calculate_number(user_name)
+        self.result_label.text = f"Numerology Number: {converted_number}"
         self.play_video(converted_number)
 
     def calculate_number(self, name):
+        """
+        Calculate the numerology number for a given name.
+
+        This method takes a user-entered name and calculates the corresponding numerology
+        number based on Pythagorean numerology and the provided vibrational correlations.
+
+        Parameters:
+            self: The NumerologyNameAnalyzerApp instance.
+            name (str): The user-entered name.
+
+        Returns:
+            str: The numerology number as a string.
+        """
         name = name.upper()  # Convert the name to uppercase for consistency
         number_mapping = {
             '1': ['A', 'J', 'S'],
@@ -65,6 +164,20 @@ class NumerologyNameAnalyzerApp(App):
         return str(total)
 
     def play_video(self, number):
+        """
+        Play the associated video explanation for a numerology number.
+
+        This method plays the video explanation associated with the numerology number
+        provided as an argument. It retrieves and displays the video from the 'partend'
+        directory.
+
+        Parameters:
+            self: The NumerologyNameAnalyzerApp instance.
+            number (str): The numerology number as a string.
+
+        Returns:
+            None
+        """
         video_filename = f"{number}.mp4"
         video_path = os.path.join(os.path.dirname(__file__), video_filename)
 
